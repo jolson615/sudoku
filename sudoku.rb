@@ -122,7 +122,7 @@ class Board
     @cells = []
     @attempts = 0
     @moves = 0
-    @alt_guess #initialize but do not declare. We will put a cell in here later.
+    @alt_guess #declare but do not initialize. We will put a cell in here later.
     nested_array.each_with_index do |row, y|
       row.each_with_index do |value, x|
         square = nil
