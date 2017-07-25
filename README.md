@@ -4,7 +4,7 @@
 
 There are 5 test boards hard-coded into the program.
 
-To run the code with the most difficult board I could find, just navigate to this repo in terminal and type `ruby sudoky.rb`.
+To run the code with the most difficult board I could find, just navigate to this repo in terminal and type `ruby sudoku.rb`.
 
 The very last lines initialize a new game with the code `trial = Solver.new(test_5)` and then run that game with `trial.solve`. To see the program run with an easier puzzle, replace the `test_5` with `test_1`. Tests 1-5 are ordered in ascending difficulty. Only tests 4 and 5 require the program to branch. 
 
