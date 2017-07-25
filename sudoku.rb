@@ -1,16 +1,4 @@
 test_1 = [
-  [2,8,1,9,3,4,6,7,5],
-  [7,4,6,1,8,5,9,3,2],
-  [9,3,5,2,7,6,1,8,4],
-  [4,6,2,8,9,3,7,5,1],
-  [5,9,7,6,2,1,8,4,3],
-  [3,1,8,5,4,7,2,9,6],
-  [6,7,9,4,5,2,3,1,8],
-  [1,5,3,7,6,8,4,2,9],
-  [8,2,4,3,1,9,5,6,7]
-]
-
-test_2 = [
   [nil,8,1,9,nil,nil,nil,7,5],
   [7,nil,6,nil,nil,nil,nil,3,nil],
   [nil,nil,nil,2,7,nil,nil,nil,nil],
@@ -22,19 +10,7 @@ test_2 = [
   [8,2,nil,nil,nil,9,5,6,nil]
 ]
 
-test_3 = [
-  [7,5,6,1,2,4,3,9,8],
-  [9,1,3,7,8,6,5,4,2],
-  [2,4,8,3,5,9,7,1,6],
-  [4,3,1,6,7,8,2,5,9],
-  [5,8,9,4,3,2,1,6,7],
-  [6,7,2,5,9,1,8,3,4],
-  [8,6,7,9,1,3,4,2,5],
-  [1,9,5,2,4,7,6,8,3],
-  [3,2,4,8,6,5,9,7,1]
-]
-
-test_4 = [
+test_2 = [
   [7,nil,6,1,nil,nil,nil,nil,8],
   [9,nil,nil,7,8,nil,nil,4,nil],
   [nil,4,nil,nil,nil,9,nil,1,6],
@@ -46,19 +22,7 @@ test_4 = [
   [3,nil,nil,nil,nil,5,9,nil,1]
 ]
 
-test_5 = [
-  [4,7,3,5,8,1,6,2,9],
-  [1,9,5,7,6,2,3,4,8],
-  [2,6,8,9,3,4,5,7,1],
-  [7,5,9,8,2,6,1,3,4],
-  [6,8,1,3,4,9,7,5,2],
-  [3,4,2,1,7,5,9,8,6],
-  [5,2,4,6,1,3,8,9,7],
-  [8,3,6,4,9,7,2,1,5],
-  [9,1,7,2,5,8,4,6,3]
-]
-
-test_6 = [
+test_3 = [
   [nil,nil,nil,nil,8,1,6,nil,nil],
   [1,9,nil,nil,nil,2,nil,4,nil],
   [nil,6,8,nil,nil,4,5,nil,nil],
@@ -70,7 +34,7 @@ test_6 = [
   [nil,nil,7,2,5,nil,nil,nil,nil]
 ]
 
-test_7 = [
+test_4 = [
   [5,nil,1,nil,nil,nil,8,nil,7],
   [nil,2,nil,nil,nil,nil,nil,3,nil],
   [8,nil,nil,6,nil,5,nil,nil,4],
@@ -80,6 +44,18 @@ test_7 = [
   [3,nil,nil,2,nil,6,nil,nil,9],
   [nil,8,nil,nil,nil,nil,nil,5,nil],
   [2,nil,9,nil,nil,nil,7,nil,6]
+]
+
+test_5 = [
+  [nil,nil,4,6,nil,nil,5,nil,nil],
+  [nil,nil,nil,nil,nil,1,8,3,nil],
+  [9,nil,nil,nil,nil,2,4,nil,nil],
+  [nil,nil,7,nil,1,nil,nil,nil,nil],
+  [8,6,nil,nil,9,nil,nil,4,2],
+  [nil,nil,nil,nil,8,nil,6,nil,nil],
+  [nil,nil,8,3,nil,nil,nil,nil,6],
+  [nil,4,6,8,nil,nil,nil,nil,nil],
+  [nil,nil,9,nil,nil,7,2,nil,nil]
 ]
 
 paradox_board = [
@@ -102,28 +78,51 @@ def flatten(ary)
   return values
 end
 
+def string_version_of(nested_array)
+  nested_array.to_s.delete("],[").delete("[").delete("]")
+end
+
+def nested_array_of(string)
+  list = string.split(/\W/)
+  puts "list #{list}"
+  result = []
+  9.times do |i|
+    result.push([])
+    9.times do
+      thisnum = list.shift.to_i
+      if thisnum == 0
+        result[i].push(nil)
+      else
+        result[i].push(thisnum)
+      end
+    end
+    i += 1
+  end
+  return result
+end
+
 class Cell
-  attr_accessor :possibilities, :value, :row, :column, :square, :index
-  def initialize(row, column, square, index, value = nil)
+  attr_accessor :possibilities, :value, :row, :column, :square
+  def initialize(row, column, square, value = nil)
     @possibilities = [1,2,3,4,5,6,7,8,9]
     @value = value
     @row = row
     @column = column
-    @index = index
+    # @index = index # value 1-81 (I think - might be 0-80) Currently unused, but useful? Not used in guess squares.
     @square = square
   end
 end
 
 class Board
   attr_accessor :cells
-  attr_reader :original_data
+  attr_reader :original_data, :guess
 
   def initialize(nested_array)
-    @original_data = nested_array
+    @original_data = string_version_of(nested_array)
     @cells = []
     @attempts = 0
     @moves = 0
-    @guesses = []
+    @alt_guess #initialize but do not declare. We will put a cell in here later.
     nested_array.each_with_index do |row, y|
       row.each_with_index do |value, x|
         square = nil
@@ -152,8 +151,8 @@ class Board
             square = 8
           end
         end
-        index = @cells.count
-        cells.push(Cell.new(y, x, square, index, value))
+        # index = @cells.count
+        cells.push(Cell.new(y, x, square, value))
       end
     end
     @rows = []
@@ -197,7 +196,7 @@ class Board
     end
     self.clean
     @cells.each do |cell|
-      puts "row #{cell.row + 1} column #{cell.column + 1} could still be #{cell.possibilities}"
+      # puts "row #{cell.row + 1} column #{cell.column + 1} could still be #{cell.possibilities}"
     end
   end
 
@@ -210,7 +209,8 @@ class Board
       type.each_with_index do |group, x|
         # The return value of a delete function should not be the deleted thing. That is profoundly dumb. We have pop and search for that.
         number_of_open_cells = flatten(group).count(nil)
-        puts "#{key.to_s.chop} #{x+1} has #{number_of_open_cells} open cells."
+        # puts "#{key.to_s.chop} #{x+1} has #{number_of_open_cells} open cells."
+        # uncomment the lines above
         possibilities = []
         if number_of_open_cells > 2 # why bother if no elimination is possible?
           group.each do |cell|
@@ -220,7 +220,7 @@ class Board
           end
         end
         if possibilities.uniq.length < possibilities.length
-          puts "Matching pair available in #{key.to_s.chop} #{x+1}."
+          # puts "Matching pair available in #{key.to_s.chop} #{x+1}."
         end
       end
     end
@@ -287,28 +287,26 @@ class Board
     end
   end
 
-  def guess
+  def make_guess
     @cells.each do |cell|
-      print cell.possibilities
+      # Uncomment this line if we need to debug the code.
+      # print cell.possibilities
       if !cell.value && cell.possibilities.count == 2
         choices = cell.possibilities
-        cell.value = choices.shuffle.pop
+        puts "choices include: #{choices}."
+        cell.value = choices.shuffle!.pop
+        puts "selected value: #{cell.value}."
+        puts "alternate value: #{choices[0]}"
         puts "row #{cell.row + 1} column #{cell.column + 1} is either a #{cell.possibilities[0]} or a #{cell.possibilities[1]}. Examining available solutions if it's a #{cell.value}."
         backup_cell = Cell.new(cell.row, cell.column, cell.square, choices[0])
-        @guesses.push(backup_cell)
+        @alt_guess = backup_cell
         return
       end
     end
   end
 
   def backtrack
-    # make a new board from the original data
-    # clone the cells from the new board
-    # fill in the alternate guess from above
-    # continue solving as usual
-    backup = Board.new(@original_data)
-    backup.cells[conclusion_cell.index] = conclusion_cell
-    ## Need to switch boards though - groups are fucking me up.
+    puts "this board has resulted in a paradox. Restoring the original board and assuming that the guess was incorrect."
   end
 
   def solve
@@ -323,18 +321,19 @@ class Board
       if @moves == 0
         self.pairs
         puts "Since no squares were filled in, we're initiating a guess."
-        self.guess
+        self.make_guess
       end
       self.print_board
       puts "End round #{@attempts}. \n \n"
-      if self.finished?
-        puts "All 81 squares have been filled in! \nSudoku solved in #{@attempts} rounds. \n \n"
-        puts "This solution used #{@guesses.count} guesses."
-      end
       if self.paradox?
-        self.backtrack
+        puts "Our guess resulted in a paradox..."
+        puts "Re-running."
+        return @alt_guess
         # return to start, fill in alternate guess before proceeding.
         # may not work for double bifurcation, but should be okay if we pop these JSON objects (hashes) off the end as we rectify them. This may be it, actually.
+      elsif self.finished?
+        puts "All 81 squares have been filled in! \nSudoku solved in #{@attempts} rounds. \n \n"
+        return "solved"
       end
     end
   end
@@ -374,22 +373,45 @@ class Board
 
 end
 
-trial = Board.new(test_7)
+class Solver
+  attr_reader :guesses_so_far
+
+  def initialize(nested_array)
+    @solved = false
+    @nested_array = nested_array
+    @guesses_so_far = []
+    @current_board = Board.new(@nested_array)
+  end
+
+  def try_to_solve
+    result = @current_board.solve
+    if result == "solved"  # if it is successful...
+      return "done"
+    else
+      @guesses_so_far.push(result)
+    end
+  end
+
+  def solve
+    result = self.try_to_solve
+    until result == "done" do
+      backup_cell = @guesses_so_far.pop
+      puts "row #{backup_cell.row}, column #{backup_cell.column} must, by process of elimination, be #{backup_cell.value}"
+      @nested_array[backup_cell.row][backup_cell.column] = backup_cell.value
+      @current_board = Board.new(@nested_array)
+      result = self.try_to_solve
+    end
+  end
+
+end
+# puts "\n-------"
+# print test_1
+# puts "\n-------"
+# pivot1 = string_version_of(test_1)
+# print pivot1
+# puts "\n-------"
+# print nested_array_of(pivot1)
+
+
+trial = Solver.new(test_5)
 trial.solve
-
-
-# print trial.cells
-
-
-# loop skeleton code
-# 20.times { puts "" }
-# response = ""
-# puts "Welcome to the sudoku solver. Your preloaded puzzle is as follows:"
-# trial.print_board
-# until response.downcase == "q" || response.downcase == "quit" || response.downcase == "exit"
-#   puts "Type 'quit' to leave the solver. Press 'enter' to fill in whatever's next."
-#   response = gets.chomp
-#   unless response.downcase == "q" || response.downcase == "quit" || response.downcase == "exit"
-#     trial.solve
-#   end
-# end
