@@ -200,7 +200,7 @@ class Board
     end
   end
 
-  def pairs
+  def pairs # not currrently used in the program.
     # Ultimately would like to code the logic that allows you to eliminate a pairings of possibilities that necessarily preclude using those numbers in other squares.
     # ie - squares (3,5) and (2,5) are limited to possible values of 8 and 9, which means that 8 and 9 can't appear anywhere else.
     # ALSO - 8 and 9 only appear in as possibilities in squares (3,5) and (2,5), so no other values could occupy those squares.
