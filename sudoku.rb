@@ -125,33 +125,7 @@ class Board
     @alt_guess #declare but do not initialize. We will put a cell in here later.
     nested_array.each_with_index do |row, y|
       row.each_with_index do |value, x|
-        square = nil
-        if y < 3
-          if x < 3
-            square = 0
-          elsif x < 6
-            square = 1
-          else
-            square = 2
-          end
-        elsif y < 6
-          if x < 3
-            square = 3
-          elsif x < 6
-            square = 4
-          else
-            square = 5
-          end
-        else
-          if x < 3
-            square = 6
-          elsif x < 6
-            square = 7
-          else
-            square = 8
-          end
-        end
-        # index = @cells.count
+        square = (x / 3) + 3 * (y/3) # Associates the cell to the corresponding square
         cells.push(Cell.new(y, x, square, value))
       end
     end
@@ -297,7 +271,7 @@ class Board
         cell.value = choices.shuffle!.pop
         puts "selected value: #{cell.value}."
         puts "alternate value: #{choices[0]}"
-        puts "row #{cell.row + 1} column #{cell.column + 1} is either a #{cell.possibilities[0]} or a #{cell.possibilities[1]}. Examining available solutions if it's a #{cell.value}."
+        puts "row #{cell.row + 1} column #{cell.column + 1} is either a #{cell.possibilities[0]} or a #{cell.value}. Examining available solutions if it's a #{cell.value}."
         backup_cell = Cell.new(cell.row, cell.column, cell.square, choices[0])
         @alt_guess = backup_cell
         return
